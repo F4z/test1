@@ -181,13 +181,13 @@
                             elConsole.textContent += `window.open = ${window.open.toString().substring(0, 30)}... \n`;
                             popupBlocked = true;
                         }
-                        if (!isFirefox && testOpen.location?.pathname !== "/popup.html") {
+                        if (!isFirefox && !testOpen.location?.pathname.includes("/popup.html")) {
                             // it seems that Firefox does not allow to check location, it's "restricted"
                             console.log("wrong pathname");
                             elConsole.textContent += "wrong pathname \n";
                             popupBlocked = true;
                         }
-                        if (testOpen.closed === false && testOpen.opener === window && testOpen.frameElement === null && testOpen.location?.pathname === "/popup.html") {
+                        if (testOpen.closed === false && testOpen.opener === window && testOpen.frameElement === null && testOpen.location?.pathname.includes("/popup.html")) {
                             popupBlocked = false;
                         }
                         if (popupBlocked) {
