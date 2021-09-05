@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video</title>
+
+    <style>
+        #test,
+        #reload {
+            position: relative;
+            padding: 8px 16px;
+            background: #009579;
+            border: none;
+            outline: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        :is(#test, #reload):active {
+            background: #007a63;
+        }
+
+        #test__text,
+        #reload {
+            font: bold 20px "Quicksand", san-serif;
+            color: #000000;
+            transition: all 0.2s;
+        }
+
+        .test--loading :is(#test__text, #reload__text) {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .test--loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 4px solid transparent;
+            border-top-color: #000000;
+            border-radius: 50%;
+            animation: test-loading-spinner 1s ease infinite;
+        }
+
+        @keyframes test-loading-spinner {
+            from {
+                transform: rotate(0turn);
+            }
+
+            to {
+                transform: rotate(1turn);
+            }
+        }
+    </style>
+
+    <style>
+        body {
+            background-color: black;
+        }
+
+        #console:not(:empty) {
+            background-color: #0a0a0a;
+            text-align: center;
+            padding: 5px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            white-space: pre;
+            color: green;
+            width: 560px;
+        }
+
+        #video:not(.failed) {
+            display: flex;
+        }
+
+        #video.failed {
+            color: red;
+            text-align: center;
+        }
+
+        .vertical-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        button:is(#test, #reload) {
+            margin-right: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="vertical-center">
+        <button id="test">
+            <span id="test__text">Click to load video</span>
+        </button>
+
+        <button id="reload">
+            <span id="reload__text">Reload</span>
+        </button>
+    </div>
+    <div class="vertical-center">
+        <div>
+            <div id="console"></div>
+            <div id="video"></div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var button = document.querySelector("button#test");
+            var buttonText = document.querySelector("#test__text");
+            var elConsole = document.querySelector("#console");
+            var video = document.querySelector('#video')
+
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
+            button.addEventListener("click", function () {
+                button.classList.toggle('test--loading');
+                video.innerHTML = "";
+                elConsole.textContent = "Console log: \n";
+                var testOpen = window.open("popup.html");
+
+                var popupBlocked = false;
+
+                var changeText = function () {
+                    button.classList.toggle('test--loading');
+                    if (popupBlocked) {
+                        buttonText.textContent = "Try again";
+                    } else {
+                        buttonText.textContent = "Video loaded";
+                    }
+
+                }
+                var popBlocked = function () {
+                    video.classList.add("failed");
+                    changeText();
+                    video.innerHTML = 'Popup blocked';
+
+                };
+                var loadVideo = function () {
+                    changeText();
+                    elConsole.textContent += "Video loaded \n";
+                    video.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+
+                };
+
+                setTimeout(function () {
+                    try {
+                        if (!testOpen) {
+                            console.log("something went wrong");
+                            elConsole.textContent += "something went wrong \n";
+                            popupBlocked = true;
+                            return;
+                        }
+                        if (testOpen.closed !== false) {
+                            console.log("closed not equal to false");
+                            elConsole.textContent += `closed = ${testOpen.closed} \n`;
+                            popupBlocked = true;
+                        }
+                        if (testOpen.opener !== window) {
+                            console.log("opener not equal to window");
+                            elConsole.textContent += `opener = ${testOpen.opener} \n`;
+                            popupBlocked = true;
+                        }
+                        if (testOpen.frameElement !== null) {
+                            console.log("frameElement not equal to null");
+                            if (testOpen.frameElement instanceof HTMLElement) { elConsole.textContent += `frameElement = ${testOpen.frameElement.outerHTML.substring(0, 30)}... \n`; }
+                            else { elConsole.textContent += `frameElement = ${testOpen.frameElement} \n`; }
+                            popupBlocked = true;
+                        }
+                        if (!/^function\s*[a-z0-9_\$]*\s*\([^)]*\)\s*\{\s*\[native code\]\s*\}/i.test(window.open)) {
+                            console.log("window.open not equal to native code");
+                            elConsole.textContent += `window.open = ${window.open.toString().substring(0, 30)}... \n`;
+                            popupBlocked = true;
+                        }
+                        if (!isFirefox && testOpen.location?.pathname !== "/popup.html") {
+                            // it seems that Firefox does not allow to check location, it's "restricted"
+                            console.log("wrong pathname");
+                            elConsole.textContent += "wrong pathname \n";
+                            popupBlocked = true;
+                        }
+                        if (testOpen.closed === false && testOpen.opener === window && testOpen.frameElement === null && testOpen.location?.pathname === "/popup.html") {
+                            popupBlocked = false;
+                        }
+                        if (popupBlocked) {
+                            popBlocked();
+
+                        }
+                        if (!popupBlocked) {
+                            loadVideo();
+                        }
+                    } catch (ex) {
+                        popupBlocked = true;
+                        elConsole.textContent += "Error, something went wrong \n";
+                        popBlocked();
+                    }
+
+                }, 1000);
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            var reloadButton = document.querySelector("button#reload");
+            reloadButton.addEventListener("click", function () {
+                reloadButton.classList.toggle('test--loading');
+                setTimeout(function () { window.location.reload(true); }, 1000)
+            });
+        }());
+    </script>
+
+</body>
+
+</html>

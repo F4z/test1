@@ -1,0 +1,55 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .loading {
+            font-size: larger;
+        }
+
+        .loading::after {
+            display: inline-block;
+            animation: dotty steps(1, end) 1s infinite;
+            content: '';
+        }
+
+        @keyframes dotty {
+            0% {
+                content: '';
+            }
+
+            25% {
+                content: '.';
+            }
+
+            50% {
+                content: '..';
+            }
+
+            75% {
+                content: '...';
+            }
+
+            100% {
+                content: '';
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading">Redirecting to ads</div>
+    <script>
+        (function () {
+            setTimeout(function () {
+                location = "https://example.org/"
+            }
+                , 2000);
+        })();
+    </script>
+</body>
+
+</html>
