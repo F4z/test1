@@ -158,6 +158,7 @@
                             console.log("something went wrong");
                             elConsole.textContent += "something went wrong \n";
                             popupBlocked = true;
+                            popBlocked();
                             return;
                         }
                         if (testOpen.closed !== false) {
