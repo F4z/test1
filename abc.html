@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Test</title>
+</head>
+
+<body>
+    <script>
+        function generateContent() {
+            return void 0 === generateContent.val && (generateContent.val = " \nwindow.alert('blablabla');");
+        }
+
+        (function() {
+
+            try {
+                Object.defineProperty(document.currentScript, "textContent", {
+                    get: generateContent
+                });
+            } catch (e) {}
+
+            alert("test");
+        })();
+    </script>
+    <script>
+        (function() {
+            alert("test1");
+        })();
+    </script>
+    <script src="test.js"></script>
+</body>
+
+</html>
